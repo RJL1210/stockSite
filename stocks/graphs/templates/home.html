@@ -2,4 +2,15 @@
 
 <h1>Stocks</h1>
 
-{{ api }} {% endblock %}
+{% if api %} 
+  {% if api == "Error..." %} 
+    There was an error with your ticker symbol. Please try again. 
+  {% else %} 
+      The current price of {{ processed_api.symbol }} is ${{ processed_api.price }}.
+  {% endif %} 
+
+{% else %} 
+
+{% endif %} 
+
+{% endblock %}
