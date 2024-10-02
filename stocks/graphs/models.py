@@ -1,6 +1,6 @@
 from django.db import models
 
-class Stocks(models.Model):
+class Stock(models.Model):
     #im pretty sure all tickers are shorter than 10 chars
     ticker = models.CharField(max_length=10)
 

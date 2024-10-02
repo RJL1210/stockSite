@@ -47,7 +47,7 @@
               type="search"
               placeholder="Search Stock Quote"
               aria-label="Search"
-              name="Ticker"
+              name="ticker"
             />
 
             <button class="btn btn-outline-success" type="submit">
@@ -57,8 +57,30 @@
         </div>
       </div>
     </nav>
-
-    <div class="container">{% block content %} {% endblock %}</div>
+    
+    <div class="container">
+      
+      
+      {% if messages %}
+        {% for message in messages%}
+          <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" aria-label="Close" data-bs-dismiss="alert">
+            </button> 
+          </div> <br>
+        {% endfor %}
+      {% endif %}
+      
+      
+      
+      {% block content %} 
+      
+      {% endblock %}
+    
+    
+    
+    
+    </div>
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
