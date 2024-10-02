@@ -17,19 +17,24 @@ def home(request):
         daily_url = requests.get('https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=' + ticker +'&apikey=' + context['api_key'])
 
         overview_default = requests.get('https://www.alphavantage.co/query?function=OVERVIEW&symbol=IBM&apikey=demo')
-        overview_url = requests.get('https://www.alphavantage.co/query?function=OVERVIEW&symbol=IBM&apikey=demo')
-        #daily_url = 
-        #daily_req = requests.get(daily_url)
+        overview_url = requests.get('https://www.alphavantage.co/query?function=OVERVIEW&symbol=' + ticker + '&apikey=' + context['api_key'])
 
         try:
             api = json.loads(daily_url.content)
             processed_api = {}
-            if api['Information']:
+            # Check if the API call was successful
+            try:
+                if api['Global Quote']:
+                    # API call was successful
+                    overview = json.loads(overview_url.content)
+                    processed_api['outOfCalls'] = False
+            except Exception as e:
+                #out of calls
                 api = json.loads(default_url.content)
                 overview = json.loads(overview_default.content)
                 processed_api['outOfCalls'] = True
-            else:    
-                overview = json.loads(overview_url.content)
+
+
             processed_api['symbol'] = api['Global Quote']['01. symbol']
             processed_api['open'] = api['Global Quote']['02. open']
             processed_api['high'] = api['Global Quote']['03. high']
@@ -47,13 +52,18 @@ def home(request):
             processed_api['52weeklow'] = overview['52WeekLow']
 
         except Exception as e:
+            #invalid ticker
             api = "Error..."
             processed_api = {}
         return render(request, 'home.html', {'api': api, 'processed_api': processed_api})
     else:
+        #default display
         return render(request, 'home.html', {'Ticker': "Search for a stock ticker above"})
 
     
 
 def about(request):
     return render(request, 'about.html', {})
+
+def add_stock(request):
+    return render(request, 'add_stock.html', {})

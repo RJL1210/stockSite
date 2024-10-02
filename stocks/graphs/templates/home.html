@@ -7,12 +7,15 @@
 
 {% if api %} 
   {% if api == "Error..." %} 
-    There was an error with your ticker symbol or I am out of API requests for the day lol.
+    <h1> There was an error with your ticker symbol. Please try again. </h1>
   {% else %} 
     {% if processed_api.outOfCalls %}
       <h1> I am out of API calls lol so heres IBM by default. </h1>
     {% endif %}
       <h1> {{ processed_api.companyname }} </h1>
+      <br>
+      Symbol: {{ processed_api.symbol }}.
+      <br>
       Current price: ${{ processed_api.price }}.
       <br>
       Open price: ${{ processed_api.open }}.
