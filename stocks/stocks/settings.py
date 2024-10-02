@@ -120,7 +120,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
-ALPHA_VANTAGE_API = alpha_api
+ALPHA_VANTAGE_API = alpha_api2
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

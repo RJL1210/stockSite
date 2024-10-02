@@ -32,12 +32,14 @@
               <a class="nav-link" href="{% url 'about' %}">About</a>
             </li>
           </ul>
-          <form class="d-flex" role="search">
+          <form action= "{% url 'home' %}" class="d-flex" role="search" method="POST">
+            {% csrf_token %}
             <input
               class="form-control me-2"
               type="search"
-              placeholder="Search"
+              placeholder="Search Stock Quote"
               aria-label="Search"
+              name="Ticker"
             />
             <button class="btn btn-outline-success" type="submit">
               Search
