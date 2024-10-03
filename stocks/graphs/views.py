@@ -87,62 +87,59 @@ def about(request):
 def add_stock(request):
     import requests
     import json
-
+    
     if request.method == 'POST':
         form = StockForm(request.POST or None)
-
         if form.is_valid():
             form.save()
             messages.success(request, ('Stock has been added'))
             return redirect('add_stock')
     else:
-
         processed_apis = {}
-        index = 0
         ticker = Stock.objects.all()
-        curr_api = {}
 
-        for symb in ticker:
+        for index, symb in enumerate(ticker):
             api_request = requests.get('https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=' + str(symb) + '&apikey=' + context['api_key'])
             overview_url = requests.get('https://www.alphavantage.co/query?function=OVERVIEW&symbol=' + str(symb) + '&apikey=' + context['api_key'])
 
             try: 
                 api = json.loads(api_request.content)
                 overview = json.loads(overview_url.content)
-                if api['Global Quote']:
+                curr_api = {}
+                if 'Global Quote' in api:
                     curr_api['outOfCalls'] = False
+                else:
+                    raise KeyError
             except Exception as e:
                 default_url = requests.get('https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=IBM&apikey=demo')
                 overview_default = requests.get('https://www.alphavantage.co/query?function=OVERVIEW&symbol=IBM&apikey=demo')
                 api = json.loads(default_url.content)
                 overview = json.loads(overview_default.content)
+                curr_api = {}
                 curr_api['outOfCalls'] = True
 
-            print(api)
+            curr_api['symbol'] = api['Global Quote'].get('01. symbol', 'N/A')
+            curr_api['open'] = api['Global Quote'].get('02. open', 'N/A')
+            curr_api['high'] = api['Global Quote'].get('03. high', 'N/A')
+            curr_api['low'] = api['Global Quote'].get('04. low', 'N/A')
+            curr_api['price'] = api['Global Quote'].get('05. price', 'N/A')
+            curr_api['volume'] = api['Global Quote'].get('06. volume', 'N/A')
+            curr_api['latest trading day'] = api['Global Quote'].get('07. latest trading day', 'N/A')
+            curr_api['previous close'] = api['Global Quote'].get('08. previous close', 'N/A')
+            curr_api['change'] = api['Global Quote'].get('09. change', 'N/A')
+            curr_api['change percent'] = api['Global Quote'].get('10. change percent', 'N/A')
 
-            curr_api['symbol'] = api['Global Quote']['01. symbol']
-            curr_api['open'] = api['Global Quote']['02. open']
-            curr_api['high'] = api['Global Quote']['03. high']
-            curr_api['low'] = api['Global Quote']['04. low']
-            curr_api['price'] = api['Global Quote']['05. price']
-            curr_api['volume'] = api['Global Quote']['06. volume']
-            curr_api['latest trading day'] = api['Global Quote']['07. latest trading day']
-            curr_api['previous close'] = api['Global Quote']['08. previous close']
-            curr_api['change'] = api['Global Quote']['09. change']
-            curr_api['change percent'] = api['Global Quote']['10. change percent']
-
-            curr_api['marketcap'] = readNumber(overview['MarketCapitalization'])
-            curr_api['companyname'] = overview['Name']
-            curr_api['52weekhigh'] = overview['52WeekHigh']
-            curr_api['52weeklow'] = overview['52WeekLow']
+            curr_api['marketcap'] = readNumber(overview.get('MarketCapitalization', 'N/A'))
+            curr_api['companyname'] = overview.get('Name', 'N/A')
+            curr_api['52weekhigh'] = overview.get('52WeekHigh', 'N/A')
+            curr_api['52weeklow'] = overview.get('52WeekLow', 'N/A')
             
             processed_apis[index] = curr_api
-            index += 1
-            
-            combined = zip(ticker, processed_apis)
 
-        return render(request, 'add_stock.html', {'ticker': ticker, 'combined': combined})
-    
+        combined = zip(ticker, processed_apis.values())
+
+    return render(request, 'add_stock.html', {'ticker': ticker, 'processed_apis': processed_apis, 'combined': combined})
+
 def delete_stock(request, stock_id):
     item = Stock.objects.get(pk=stock_id)
     item.delete()
