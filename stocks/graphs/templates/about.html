@@ -1,5 +1,31 @@
 {% extends 'base.html' %} {% block content %}
 
-<h1>About</h1>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h1>About</h1>
+                </div>
+                <div class="card-body">
+                    <p>Welcome to Ryan Li's stock site! This site allows you to track and manage your stock portfolio with ease.</p>
+                    <p>Here are some key functionalities:</p>
+                    <h3>Home Page</h3>
+                    <ul>
+                        <li>Search for stock information using the ticker symbol.</li>
+                        <li>View detailed stock data including current price, open price, high price, low price, 52-week high, 52-week low, and market capitalization.</li>
+                    </ul>
+                    <h3>Saved Stocks</h3>
+                    <ul>
+                        <li>Add stocks to your portfolio and track their performance.</li>
+                        <li>Delete stocks from your portfolio when you no longer want to track them.</li>
+                    </ul>
+                    <p><strong>Note:</strong> If you see IBM data or repeated data, it is most likely because I ran out of API calls for the day.</p>
+                    <p><strong>Note:</strong> Stock information is gathered from the previous day's closing prices as real-time updates cost money.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 {% endblock %}

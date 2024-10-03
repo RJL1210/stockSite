@@ -77,7 +77,7 @@ def home(request):
         return render(request, 'home.html', {'api': api, 'processed_api': processed_api})
     else:
         #default display
-        return render(request, 'home.html', {'Ticker': "Search for a stock ticker above"})
+        return render(request, 'home.html', {'Ticker': ""})
 
     
 
@@ -87,7 +87,7 @@ def about(request):
 def add_stock(request):
     import requests
     import json
-    
+
     if request.method == 'POST':
         form = StockForm(request.POST or None)
         if form.is_valid():
