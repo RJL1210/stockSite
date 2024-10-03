@@ -1,6 +1,5 @@
 {% extends 'base.html' %} {% block content %}
 
-
 {% if Ticker %}
   {{ Ticker }}
 {% endif %}
@@ -11,26 +10,92 @@
   {% else %} 
     {% if processed_api.outOfCalls %}
       <h1> I am out of API calls lol so heres IBM by default. </h1>
+      <br>
     {% endif %}
-      <h1> {{ processed_api.companyname }} </h1>
-      <br>
-      Symbol: {{ processed_api.symbol }}.
-      <br>
-      Current price: ${{ processed_api.price }}.
-      <br>
-      Open price: ${{ processed_api.open }}.
-      <br>
-      High price: ${{ processed_api.high }}.
-      <br>
-      Low price: ${{ processed_api.low }}.
-      <br>
-      Volume: {{ processed_api.volume }}.
-      <br>
-      Market cap: ${{ processed_api.marketcap }}.
+      <table class="table table-primary table-striped table-hover table-bordered">
+        <thead class="table-light">
+          <tr>
+            <th scope="col">Symbol</th>
+            <th scope="col">Company Name</th>
+            <th scope="col">Current price</th>
+            <th scope="col">Open price</th>
+            <th scope="col">High price</th>
+            <th scope="col">Low Price</th>
+            <th scope="col">52 Week High</th>
+            <th scope="col">52 Week Low</th>
+            <th scope="col">Market Cap</th>
+          </tr>
+        </thead>
+        <tbody class="table-group-divider">
+          <tr>
+            <th scope="row">{{ processed_api.symbol }}</th>
+            <td>{{ processed_api.companyname }}</td>
+            <td>${{ processed_api.price }}</td>
+            <td>${{ processed_api.open }}</td>
+            <td>${{ processed_api.high }}</td>
+            <td>${{ processed_api.low }}</td>
+            <td>${{ processed_api.52weekhigh }}</td>
+            <td>${{ processed_api.52weeklow }}</td>
+            <td>${{ processed_api.marketcap }}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <canvas id="stockChart" width="400" height="200"></canvas>
   {% endif %} 
 
 {% else %} 
 
 {% endif %} 
 
+{% endblock %}
+
+{% block extra_js%}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var ctx = document.getElementById('stockChart').getContext('2d');
+    var stockChart = new Chart(ctx, {
+      type: 'bar', // You can change this to 'line', 'pie', etc.
+      data: {
+        labels: ['Current Price', 'Open Price', 'High Price', 'Low Price', '52 Week High', '52 Week Low'],
+        datasets: [{
+          label: 'Stock Data',
+          data: [
+            {{ processed_api.price }},
+            {{ processed_api.open }},
+            {{ processed_api.high }},
+            {{ processed_api.low }},
+            {{ processed_api.52weekhigh}},
+            {{ processed_api.52weeklow }},
+
+          ],
+          backgroundColor: [
+            'rgba(75, 192, 192, 0.2)',
+            'rgba(54, 162, 235, 0.2)',
+            'rgba(255, 206, 86, 0.2)',
+            'rgba(75, 192, 192, 0.2)',
+            'rgba(153, 102, 255, 0.2)',
+            'rgba(255, 159, 64, 0.2)'
+          ],
+          borderColor: [
+            'rgba(75, 192, 192, 1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 206, 86, 1)',
+            'rgba(75, 192, 192, 1)',
+            'rgba(153, 102, 255, 1)',
+            'rgba(255, 159, 64, 1)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        scales: {
+          y: {
+            beginAtZero: true
+          }
+        }
+      }
+    });
+  });
+</script>
 {% endblock %}
