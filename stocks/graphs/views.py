@@ -99,24 +99,23 @@ def add_stock(request):
         ticker = Stock.objects.all()
 
         for index, symb in enumerate(ticker):
-            api_request = requests.get('https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=' + str(symb) + '&apikey=' + context['api_key'])
+            api_request = requests.get('https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=' + str(symb) +'&apikey=' + context['api_key'])
             overview_url = requests.get('https://www.alphavantage.co/query?function=OVERVIEW&symbol=' + str(symb) + '&apikey=' + context['api_key'])
 
+            # If api call was successfull, process it
             try: 
-                api = json.loads(api_request.content)
-                overview = json.loads(overview_url.content)
                 curr_api = {}
-                if 'Global Quote' in api:
-                    curr_api['outOfCalls'] = False
-                else:
-                    raise KeyError
+                api = json.loads(api_request.content)
+                print(api)
+                if api['Global Quote']:
+                    overview = json.loads(overview_url.content)
             except Exception as e:
+                #api call was not successful so use default api (IBM)
                 default_url = requests.get('https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=IBM&apikey=demo')
                 overview_default = requests.get('https://www.alphavantage.co/query?function=OVERVIEW&symbol=IBM&apikey=demo')
                 api = json.loads(default_url.content)
                 overview = json.loads(overview_default.content)
                 curr_api = {}
-                curr_api['outOfCalls'] = True
 
             curr_api['symbol'] = api['Global Quote'].get('01. symbol', 'N/A')
             curr_api['open'] = api['Global Quote'].get('02. open', 'N/A')
@@ -138,7 +137,7 @@ def add_stock(request):
 
         combined = zip(ticker, processed_apis.values())
 
-    return render(request, 'add_stock.html', {'ticker': ticker, 'processed_apis': processed_apis, 'combined': combined})
+    return render(request, 'add_stock.html', {'combined': combined})
 
 def delete_stock(request, stock_id):
     item = Stock.objects.get(pk=stock_id)
