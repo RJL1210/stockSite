@@ -47,28 +47,38 @@ def home(request):
                     # API call was successful
                     overview = json.loads(overview_url.content)
                     processed_api['outOfCalls'] = False
+
+                    processed_api['symbol'] = api['Global Quote']['01. symbol']
+                    processed_api['open'] = api['Global Quote']['02. open']
+                    processed_api['high'] = api['Global Quote']['03. high']
+                    processed_api['low'] = api['Global Quote']['04. low']
+                    processed_api['price'] = api['Global Quote']['05. price']
+                    processed_api['volume'] = api['Global Quote']['06. volume']
+                    processed_api['latest trading day'] = api['Global Quote']['07. latest trading day']
+                    processed_api['previous close'] = api['Global Quote']['08. previous close']
+                    processed_api['change'] = api['Global Quote']['09. change']
+                    processed_api['change percent'] = api['Global Quote']['10. change percent']
+
+                    processed_api['marketcap'] = readNumber(overview['MarketCapitalization'])
+                    processed_api['companyname'] = overview['Name']
+                    processed_api['52weekhigh'] = overview['52WeekHigh']
+                    processed_api['52weeklow'] = overview['52WeekLow']
             except Exception as e:
                 #out of calls
-                api = json.loads(default_url.content)
-                overview = json.loads(overview_default.content)
                 processed_api['outOfCalls'] = True
+                processed_api['symbol'] = 'IBM'
+                processed_api['open'] = '219.5000'
+                processed_api['high'] = "222.8300"
+                processed_api['low'] = "219.2700"
+                processed_api['price'] = "222.7200"
+
+                processed_api['marketcap'] = readNumber("202403856000")
+                processed_api['companyname'] = "International Business Machines"
+                processed_api['52weekhigh'] = "224.15"
+                processed_api['52weeklow'] = "130.68"
 
 
-            processed_api['symbol'] = api['Global Quote']['01. symbol']
-            processed_api['open'] = api['Global Quote']['02. open']
-            processed_api['high'] = api['Global Quote']['03. high']
-            processed_api['low'] = api['Global Quote']['04. low']
-            processed_api['price'] = api['Global Quote']['05. price']
-            processed_api['volume'] = api['Global Quote']['06. volume']
-            processed_api['latest trading day'] = api['Global Quote']['07. latest trading day']
-            processed_api['previous close'] = api['Global Quote']['08. previous close']
-            processed_api['change'] = api['Global Quote']['09. change']
-            processed_api['change percent'] = api['Global Quote']['10. change percent']
-
-            processed_api['marketcap'] = readNumber(overview['MarketCapitalization'])
-            processed_api['companyname'] = overview['Name']
-            processed_api['52weekhigh'] = overview['52WeekHigh']
-            processed_api['52weeklow'] = overview['52WeekLow']
+            
 
         except Exception as e:
             #invalid ticker
@@ -106,32 +116,37 @@ def add_stock(request):
             try: 
                 curr_api = {}
                 api = json.loads(api_request.content)
-                print(api)
                 if api['Global Quote']:
                     overview = json.loads(overview_url.content)
+                    curr_api['symbol'] = api['Global Quote'].get('01. symbol', 'N/A')
+                    curr_api['open'] = api['Global Quote'].get('02. open', 'N/A')
+                    curr_api['high'] = api['Global Quote'].get('03. high', 'N/A')
+                    curr_api['low'] = api['Global Quote'].get('04. low', 'N/A')
+                    curr_api['price'] = api['Global Quote'].get('05. price', 'N/A')
+                    curr_api['volume'] = api['Global Quote'].get('06. volume', 'N/A')
+                    curr_api['latest trading day'] = api['Global Quote'].get('07. latest trading day', 'N/A')
+                    curr_api['previous close'] = api['Global Quote'].get('08. previous close', 'N/A')
+                    curr_api['change'] = api['Global Quote'].get('09. change', 'N/A')
+                    curr_api['change percent'] = api['Global Quote'].get('10. change percent', 'N/A')
+
+                    curr_api['marketcap'] = readNumber(overview.get('MarketCapitalization', 'N/A'))
+                    curr_api['companyname'] = overview.get('Name', 'N/A')
+                    curr_api['52weekhigh'] = overview.get('52WeekHigh', 'N/A')
+                    curr_api['52weeklow'] = overview.get('52WeekLow', 'N/A')
             except Exception as e:
                 #api call was not successful so use default api (IBM)
-                default_url = requests.get('https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=IBM&apikey=demo')
-                overview_default = requests.get('https://www.alphavantage.co/query?function=OVERVIEW&symbol=IBM&apikey=demo')
-                api = json.loads(default_url.content)
-                overview = json.loads(overview_default.content)
                 curr_api = {}
+                curr_api['symbol'] = 'IBM'
+                curr_api['open'] = '219.5000'
+                curr_api['high'] = "222.8300"
+                curr_api['low'] = "219.2700"
+                curr_api['price'] = "222.7200"
 
-            curr_api['symbol'] = api['Global Quote'].get('01. symbol', 'N/A')
-            curr_api['open'] = api['Global Quote'].get('02. open', 'N/A')
-            curr_api['high'] = api['Global Quote'].get('03. high', 'N/A')
-            curr_api['low'] = api['Global Quote'].get('04. low', 'N/A')
-            curr_api['price'] = api['Global Quote'].get('05. price', 'N/A')
-            curr_api['volume'] = api['Global Quote'].get('06. volume', 'N/A')
-            curr_api['latest trading day'] = api['Global Quote'].get('07. latest trading day', 'N/A')
-            curr_api['previous close'] = api['Global Quote'].get('08. previous close', 'N/A')
-            curr_api['change'] = api['Global Quote'].get('09. change', 'N/A')
-            curr_api['change percent'] = api['Global Quote'].get('10. change percent', 'N/A')
+                curr_api['marketcap'] = readNumber("202403856000")
+                curr_api['companyname'] = "International Business Machines"
+                curr_api['52weekhigh'] = "224.15"
+                curr_api['52weeklow'] = "130.68"
 
-            curr_api['marketcap'] = readNumber(overview.get('MarketCapitalization', 'N/A'))
-            curr_api['companyname'] = overview.get('Name', 'N/A')
-            curr_api['52weekhigh'] = overview.get('52WeekHigh', 'N/A')
-            curr_api['52weeklow'] = overview.get('52WeekLow', 'N/A')
             
             processed_apis[index] = curr_api
 
