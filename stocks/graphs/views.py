@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib import messages
 from .models import Stock
 from .forms import StockForm
+from django.contrib.auth.decorators import login_required
 
 context = {
         "api_key": settings.ALPHA_VANTAGE_API,
@@ -94,6 +95,7 @@ def home(request):
 def about(request):
     return render(request, 'about.html', {})
 
+@login_required
 def add_stock(request):
     import requests
     import json
