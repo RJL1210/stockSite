@@ -103,61 +103,59 @@ def add_stock(request):
     if request.method == 'POST':
         form = StockForm(request.POST or None)
         if form.is_valid():
-            form.save()
+            stock = form.save(commit = False)
+            stock.user = request.user
+            stock.save()
             messages.success(request, ('Stock has been added'))
             return redirect('add_stock')
     else:
-        processed_apis = {}
-        ticker = Stock.objects.all()
+        form = StockForm()
+    
+    stocks = Stock.objects.filter(user=request.user)
+    processed_apis = {}
+    for index, stock in enumerate(stocks):
+        ticker = stock
+        try:
+            api_request = requests.get(f"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={ticker}&apikey={context['api_key']}")
+            api = api_request.json()
+            overview_request = requests.get(f"https://www.alphavantage.co/query?function=OVERVIEW&symbol={ticker}&apikey={context['api_key']}")
+            overview = overview_request.json()
 
-        for index, symb in enumerate(ticker):
-            api_request = requests.get('https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=' + str(symb) +'&apikey=' + context['api_key'])
-            overview_url = requests.get('https://www.alphavantage.co/query?function=OVERVIEW&symbol=' + str(symb) + '&apikey=' + context['api_key'])
+            curr_api = {}
+            curr_api['symbol'] = ticker
+            curr_api['open'] = api['Global Quote'].get('02. open', 'N/A')
+            curr_api['high'] = api['Global Quote'].get('03. high', 'N/A')
+            curr_api['low'] = api['Global Quote'].get('04. low', 'N/A')
+            curr_api['price'] = api['Global Quote'].get('05. price', 'N/A')
+            curr_api['change'] = api['Global Quote'].get('09. change', 'N/A')
+            curr_api['change percent'] = api['Global Quote'].get('10. change percent', 'N/A')
+            curr_api['marketcap'] = readNumber(overview.get('MarketCapitalization', 'N/A'))
+            curr_api['companyname'] = overview.get('Name', 'N/A')
+            curr_api['52weekhigh'] = overview.get('52WeekHigh', 'N/A')
+            curr_api['52weeklow'] = overview.get('52WeekLow', 'N/A')
+        except Exception as e:
+            # API call was not successful, so use default API (IBM)
+            curr_api = {}
+            curr_api['symbol'] = 'IBM'
+            curr_api['open'] = '219.5000'
+            curr_api['high'] = "222.8300"
+            curr_api['low'] = "219.2700"
+            curr_api['price'] = "222.7200"
+            curr_api['marketcap'] = readNumber("202403856000")
+            curr_api['companyname'] = "International Business Machines"
+            curr_api['52weekhigh'] = "224.15"
+            curr_api['52weeklow'] = "130.68"
 
-            # If api call was successfull, process it
-            try: 
-                curr_api = {}
-                api = json.loads(api_request.content)
-                if api['Global Quote']:
-                    overview = json.loads(overview_url.content)
-                    curr_api['symbol'] = api['Global Quote'].get('01. symbol', 'N/A')
-                    curr_api['open'] = api['Global Quote'].get('02. open', 'N/A')
-                    curr_api['high'] = api['Global Quote'].get('03. high', 'N/A')
-                    curr_api['low'] = api['Global Quote'].get('04. low', 'N/A')
-                    curr_api['price'] = api['Global Quote'].get('05. price', 'N/A')
-                    curr_api['volume'] = api['Global Quote'].get('06. volume', 'N/A')
-                    curr_api['latest trading day'] = api['Global Quote'].get('07. latest trading day', 'N/A')
-                    curr_api['previous close'] = api['Global Quote'].get('08. previous close', 'N/A')
-                    curr_api['change'] = api['Global Quote'].get('09. change', 'N/A')
-                    curr_api['change percent'] = api['Global Quote'].get('10. change percent', 'N/A')
+        processed_apis[index] = curr_api
 
-                    curr_api['marketcap'] = readNumber(overview.get('MarketCapitalization', 'N/A'))
-                    curr_api['companyname'] = overview.get('Name', 'N/A')
-                    curr_api['52weekhigh'] = overview.get('52WeekHigh', 'N/A')
-                    curr_api['52weeklow'] = overview.get('52WeekLow', 'N/A')
-            except Exception as e:
-                #api call was not successful so use default api (IBM)
-                curr_api = {}
-                curr_api['symbol'] = 'IBM'
-                curr_api['open'] = '219.5000'
-                curr_api['high'] = "222.8300"
-                curr_api['low'] = "219.2700"
-                curr_api['price'] = "222.7200"
+    combined = zip(stocks, processed_apis.values())
 
-                curr_api['marketcap'] = readNumber("202403856000")
-                curr_api['companyname'] = "International Business Machines"
-                curr_api['52weekhigh'] = "224.15"
-                curr_api['52weeklow'] = "130.68"
+    return render(request, 'add_stock.html', {'form': form, 'combined': combined})
 
-            
-            processed_apis[index] = curr_api
 
-        combined = zip(ticker, processed_apis.values())
-
-    return render(request, 'add_stock.html', {'combined': combined})
-
+@login_required
 def delete_stock(request, stock_id):
-    item = Stock.objects.get(pk=stock_id)
+    item = Stock.objects.get(pk=stock_id, user=request.user)
     item.delete()
 
     messages.success(request, ('Stock has been deleted'))

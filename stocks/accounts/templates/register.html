@@ -7,5 +7,12 @@
         {{ form.as_p }}
         <button type="submit" class="btn btn-primary">Register</button>
     </form>
+    {% if messages %}
+        <ul class="list-group mt-3">
+            {% for message in messages %}
+                <li class="list-group-item list-group-item-{{ message.tags }}">{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
 </div>
 {% endblock %}

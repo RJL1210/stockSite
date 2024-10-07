@@ -9,11 +9,14 @@ def register(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
+            messages.success(request, "Registration successful.")
             return redirect('home')
         else:
             for msg in form.error_messages:
                 messages.error(request, f"{msg}: {form.error_messages[msg]}")
-    return render(request, "accounts/register.html", {"form": form})
+    else:
+        form = UserCreationForm()  # Ensure form is defined for GET requests
+    return render(request, "register.html", {"form": form})
 
 def login_request(request):
     if request.method == "POST":
@@ -24,15 +27,17 @@ def login_request(request):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                messages.info(request, f"You are now logged in as {username}")
+                messages.info(request, f"You are now logged in as {username}.")
                 return redirect("home")
             else:
-                messages.error(request, "Invalid username or password")
+                messages.error(request, "Invalid username or password.")
         else:
-            messages.error(request, "Invalid username or password")
-    return render(request, "accounts/login.html", {"form": form})
+            messages.error(request, "Invalid username or password.")
+    else:
+        form = AuthenticationForm()  # Ensure form is defined for GET requests
+    return render(request, "login.html", {"form": form})
 
 def logout_request(request):
     logout(request)
     messages.info(request, "Logged out successfully!")
-    return redirect('login')
+    return redirect('home')
