@@ -14,15 +14,25 @@ def get_stock_info(ticker):
 
         parse = BeautifulSoup(req.text, 'html.parser')
 
-        company_name = parse.find('h1', {'class': "yf-xxbei9"}).text
+        title = parse.find('h1', {'class': "yf-xxbei9"}).text
         open = parse.find('fin-streamer', {'data-field': 'regularMarketOpen'}).text
         day_range = parse.find('fin-streamer', {'data-field': 'regularMarketDayRange'}).text
-        price = parse.find('fin-streamer', {'class': "livePrice yf-1tejb6"}).text
-        percent_change = parse.find('fin-streamer', {'class': "priceChange yf-1tejb6"}).text
-        fiftytwo_week = parse.find('fin-streamer', {'data-field': 'fiftyTwoWeekRange'}).text
-        market_cap = parse.find('fin-streamer', {'data-field': 'marketCap'}).text
+        price = parse.find('fin-streamer', {'data-field': 'regularMarketPrice'}).text
+        fifty_two_week = parse.find('fin-streamer', {'data-field': 'fiftyTwoWeekRange'}).text
+        #percent_change = parse.find('fin-streamer', {'data-field': "regularMarketChange"}).text
 
-        header_info = company_name.split("(")
+        header_info = title.split("(")
+        company_name = header_info[0]
+        ticker = header_info[1].replace(")", "")
+
+        if company_name.find("ETF") == -1: 
+            market_cap = parse.find('fin-streamer', {'data-field': 'marketCap'}).text
+            stock = True
+        else:
+            market_cap = '-'
+            stock = False
+
+        header_info = title.split("(")
         company_name = header_info[0]
         ticker = header_info[1].replace(")", "")
 
@@ -30,9 +40,9 @@ def get_stock_info(ticker):
         low = range[0]
         high = range[1]
 
-        fiftytwo_range = fiftytwo_week.split(" - ")
-        fiftytwo_week_low = fiftytwo_range[0]
-        fiftytwo_week_high = fiftytwo_range[1]
+        fifty_two_range = fifty_two_week.split(" - ")
+        fifty_two_week_low = fifty_two_range[0]
+        fifty_two_week_high = fifty_two_range[1]
 
         info = {
             'company_name': company_name,
@@ -41,10 +51,11 @@ def get_stock_info(ticker):
             'low': low,
             'high': high,
             'price': price,
-            'percent_change': percent_change,
-            'fiftytwo_week_low': fiftytwo_week_low,
-            'fiftytwo_week_high': fiftytwo_week_high,
-            'market_cap': market_cap
+            #'percent_change': percent_change,
+            'fifty_two_week_low': fifty_two_week_low,
+            'fifty_two_week_high': fifty_two_week_high,
+            'market_cap': market_cap,
+            'stock': stock
         }
 
         return info

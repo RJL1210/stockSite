@@ -64,8 +64,8 @@ def add_stock(request):
             curr_api['price'] = "222.7200"
             curr_api['market_cap'] = ("202B")
             curr_api['company_name'] = "International Business Machines"
-            curr_api['fiftytwo_week_high'] = "224.15"
-            curr_api['fiftytwo_week_low'] = "130.68"
+            curr_api['fifty_two_week_high'] = "224.15"
+            curr_api['fifty_two_week_low'] = "130.68"
 
         processed_apis[index] = curr_api
 
