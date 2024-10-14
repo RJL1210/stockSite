@@ -1,5 +1,4 @@
 from django.shortcuts import render, redirect
-from django.conf import settings
 from django.contrib import messages
 from .models import Stock
 from .forms import StockForm
@@ -74,3 +73,6 @@ def delete_stock(request, stock_id):
     messages.success(request, ('Stock has been deleted'))
 
     return redirect(add_stock)
+
+def index(request):
+    return render(request, 'index.html', {})
